@@ -1,18 +1,39 @@
 ﻿## Raspbian guild
 
-#### Download img
+#### 1.Download img
 
     http://downloads.raspberrypi.org/raspbian/images/
 
 下载Win32DiskImager工具win32diskimager-v0.9-binary.zip<云盘：所有文件\文档\树莓派>,装载img文件到SD卡中.
 
-#### 插入SD卡开机
-    startx命令进入图形界面
-    执行raspi-config配置工具
-    扩展磁盘分区
-    禁用overscan,使得屏幕最大化.
+#### 2.首次修改IP地址
+插入SD卡开机,连接显示器，键盘。
+查看当前ip信息：
+````
+sudo ifconfig
+````
 
-#### 安装WEB服务
+如果网关与本地路由不符合，修改网关：
+    
+````
+sudo route add default gw 192.168.1.1
+````
+
+获取树莓派的IP地址后，后续操作可通过远程登录修改。
+
+备份/etc/network/interfaces文件，并修改如下：
+````
+auto lo
+iface lo inet loopback
+auto eth0
+iface eth0 inet static
+address 192.168.1.118
+gateway 192.168.1.1
+netmask 255.255.255.0
+network 192.168.1.0
+````
+
+#### 3.安装WEB服务
 
 ````
 $  sudo apt-get install apache2
