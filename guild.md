@@ -4,9 +4,10 @@
 
     http://downloads.raspberrypi.org/raspbian/images/
 
-下载Win32DiskImager工具，img安装可参考网址：
-
-   http://www.cnbeta.com/articles/204970.htm
+下载Win32DiskImager工具，img安装可参考网址
+````
+    http://www.cnbeta.com/articles/204970.htm
+````
 
 #### 2.首次修改IP地址
 插入SD卡开机,连接显示器，键盘。在开机信息最后一行显示当前IP地址,如下：
@@ -16,7 +17,7 @@ My IP Address is 192.168.1.128
 
 也可通过输入命令查看当前ip信息：
 ````
-sudo ifconfig
+$  sudo ifconfig
 ````
 
 如果网关与本地路由不符合，修改网关：
@@ -27,15 +28,21 @@ $  sudo route add default gw 192.168.1.1
 
 获取树莓派的IP地址后，后续操作可通过远程登录修改。远程登录账户为pi，初始密码为raspberry。
 
-备份/etc/network/interfaces文件，并修改如下：
+备份/etc/network/interfaces文件，并打开：
+````
+$  cd /etc/network
+$  cp interfaces interfaces1
+$  sudo nano interfaces
+````
+修改如下：
 ````
 auto lo
 iface lo inet loopback
 auto eth0
 iface eth0 inet static
-address 192.168.1.118
+address 192.168.1.254
 gateway 192.168.1.1
-netmask 255.255.255.0
+netmask 255.255.0.0
 network 192.168.1.0
 ````
 
