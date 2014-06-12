@@ -131,6 +131,9 @@ echo "at $now reboot sys" >> /home/pi/shell/check_cgminer.log
 fi
 
 ````
+增加crontab（定时检查执行）,执行 crontab -e  添加：
+
+````
 */1 * * * * /usr/bin/lynx  -source  http://localhost/index.php/home/SaveHashrate  > /dev/null 2>&2
 */5 * * * * sudo bash /home/pi/shell/monitor_cgminer.sh
 0 */1  * * * sudo cp /dev/null /home/pi/nohup2.out
