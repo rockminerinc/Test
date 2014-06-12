@@ -1,12 +1,16 @@
 ﻿## Raspbian guild
 
-#### download img
+#### Download img
 
     http://downloads.raspberrypi.org/raspbian/images/
 
-#### 下载Win32DiskImager工具win32diskimager-v0.9-binary.zip<云盘：所有文件\文档\树莓派>,装载img文件到SD卡中.
+下载Win32DiskImager工具win32diskimager-v0.9-binary.zip<云盘：所有文件\文档\树莓派>,装载img文件到SD卡中.
 
-#### 插入SD卡开机，startx命令进入图形界面.执行raspi-config配置工具，扩展磁盘分区，禁用overscan，使得屏幕最大化.
+#### 插入SD卡开机
+    startx命令进入图形界面
+    执行raspi-config配置工具
+    扩展磁盘分区
+    禁用overscan,使得屏幕最大化.
 
 #### 安装WEB服务
 
@@ -18,15 +22,15 @@ $  sudo chmod 777 /etc/network/interfaces
 $  sudo chmod 777 /etc/resolv.conf 
 
 ````
-#### 下载最新webUI<所有文件\文档\树莓派\webui>,通过SSH上传webUI文件到树莓派，替换var目录下www文件夹
+下载最新webUI<所有文件\文档\树莓派\webui>,通过SSH上传webUI文件到树莓派，替换var目录下www文件夹
 
-#### 编辑/etc/sudoers 添加 www-data 为sudo用户
+编辑/etc/sudoers 添加 www-data 为sudo用户
 
 ````
 $  sudo nano /etc/sudoers
 ````
 
-#### 添加一行 Defaults visiblepw
+添加一行 Defaults visiblepw
 
 ````
 #includedir /etc/sudoers.d
@@ -34,16 +38,16 @@ pi ALL=(ALL) NOPASSWD: ALL
 www-data ALL=(ALL) NOPASSWD: ALL
 ````
 
-增加算力图形界面
+#### 增加算力图形界面
 
-#### 安装lynx 
+安装lynx 
 
 ````
 $  sudo apt-get install lynx
 
 ````
 
-#### 添加crontab，1分钟保存一次数据
+添加crontab，1分钟保存一次数据
 
 ````
 $  crontab -e
@@ -61,7 +65,7 @@ $  sudo chmod 777 /etc/network/interfaces
 $  sudo chmod 777 /etc/resolv.conf 
 
 ````
-安装cgminer
+#### 安装cgminer
 
 ```
 $  sudo apt-get update
@@ -73,8 +77,8 @@ $  ./configure --enable-icarus
 $  sudo  make
 ```
 
-制作一个服务 自启动。
-####在 /etc/init.d/目录下新建cgminer文件：
+####制作一个服务自启动。
+在 /etc/init.d/目录下新建cgminer文件：
 
 ```
 #!/bin/sh
@@ -99,22 +103,21 @@ echo "Usage: $0 (start|stop)"
 esac
 ```
 
-####修改cgminer文件权限，并执行命令
+修改cgminer文件权限，并执行命令
 
 ```
 sudo update-rc.d cgminer defaults
 ```
 
-为了防止cgminer自己挂掉 增加监控脚本
+####  为了防止cgminer自己挂掉 增加监控脚本
 
-### 新建在pi用户下新建shell目录，然后新建monitor_cgminer.sh文件
+新建在pi用户下新建shell目录，然后新建monitor_cgminer.sh文件
 ````
 pi@raspberrypi ~ $ mkdir shell 
 pi@raspberrypi ~/shell $ sudo nano monitor_cgminer.sh
 
 ````
-
-### 脚本文件如下：
+脚本文件如下：
 
 ````
 #!/bin/sh
@@ -135,4 +138,4 @@ fi
 
 ````
 
-## 备份树莓派镜像
+#### 备份树莓派镜像
