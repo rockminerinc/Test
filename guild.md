@@ -1,161 +1,138 @@
-﻿## 烧制镜像至SD卡
+﻿## Raspbian guild
 
 #### download img
 
-    http://www.raspberrypi.org/downloads
+    http://downloads.raspberrypi.org/raspbian/images/
 
-#### 插入SD卡，用df命令查看当前已挂载的卷
+#### 下载Win32DiskImager工具win32diskimager-v0.9-binary.zip<云盘：所有文件\文档\树莓派>,装载img文件到SD卡中.
 
+#### 插入SD卡开机，startx命令进入图形界面.执行raspi-config配置工具，扩展磁盘分区，禁用overscan，使得屏幕最大化.
 
-````
-$ df -h
-Filesystem      Size   Used  Avail Capacity  iused    ifree %iused  Mounted on
-/dev/disk0s2    92Gi   33Gi   59Gi    36%  8609397 15410211   36%   /
-devfs          187Ki  187Ki    0Bi   100%      648        0  100%   /dev
-/dev/disk0s4   373Gi   71Gi  302Gi    19% 18594197 79281654   19%   /Volumes/d1
-map -hosts       0Bi    0Bi    0Bi   100%        0        0  100%   /net
-map auto_home    0Bi    0Bi    0Bi   100%        0        0  100%   /home
-/dev/disk1s1   7.4Gi  3.0Mi  7.4Gi     1%        0        0  100%   /Volumes/NO NAME
-````
-
-#### 使用diskutil unmount将这些分区卸载
+#### 安装WEB服务
 
 ````
-$ diskutil unmount /dev/disk1s1
-Volume NO NAME on disk1s1 unmounted
-````
-
-#### 通过diskutil list来确认设备
-
-````
-$ diskutil list
-/dev/disk0
-   #:                       TYPE NAME                    SIZE       IDENTIFIER
-   0:      GUID_partition_scheme                        *500.3 GB   disk0
-   1:                        EFI EFI                     209.7 MB   disk0s1
-   2:                  Apple_HFS Macintosh HD            98.4 GB    disk0s2
-   3:                 Apple_Boot Recovery HD             650.0 MB   disk0s3
-   4:                  Apple_HFS d1                      400.9 GB   disk0s4
-/dev/disk1
-   #:                       TYPE NAME                    SIZE       IDENTIFIER
-   0:     FDisk_partition_scheme                        *7.9 GB     disk1
-   1:                 DOS_FAT_32 NO NAME                 7.9 GB     disk1s1
-````
-
-#### 使用dd命令将系统镜像写入。
-
-`/dev/disk1s1`是分区，`/dev/disk1`是块设备，`/dev/rdisk1`是原始字符设备。
+$  sudo apt-get install apache2
+$  sudo apt-get install php5
+$  sudo chmod -R 777 /var/www
+$  sudo chmod 777 /etc/network/interfaces
+$  sudo chmod 777 /etc/resolv.conf 
 
 ````
-$ sudo dd bs=4m if=2014-01-07-wheezy-raspbian.img of=/dev/rdisk1
-706+1 records in
-706+1 records out
-2962227200 bytes transferred in 470.754370 secs (6292511 bytes/sec)
-````
+#### 下载最新webUI<所有文件\文档\树莓派\webui>,通过SSH上传webUI文件到树莓派，替换var目录下www文件夹
 
-#### diskutil unmountDisk卸载设备
+#### 编辑/etc/sudoers 添加 www-data 为sudo用户
 
 ````
-$ diskutil unmountDisk /dev/disk1
-Unmount of all volumes on disk1 was successful
+$  sudo nano /etc/sudoers
 ````
 
-至此，树莓派SD烧录完毕。
-
-### Raspberry Pi Source List
+#### 添加一行 Defaults visiblepw
 
 ````
-sudo vi  /etc/apt/sources.list
-deb http://mirrors.ustc.edu.cn/raspbian/raspbian/   wheezy main contrib non-free rpi
-
-sudo apt-get update
-sudo apt-get install vim binutils-dev build-essential git zsh iptraf iftop screen
+#includedir /etc/sudoers.d
+pi ALL=(ALL) NOPASSWD: ALL
+www-data ALL=(ALL) NOPASSWD: ALL
 ````
 
-### 设置IP
-`sudo vim /etc/network/interfaces`
+增加算力图形界面
+
+#### 安装lynx 
+
+````
+$  sudo apt-get install lynx
+
+````
+
+#### 添加crontab，1分钟保存一次数据
+
+````
+$  crontab -e
+   */1 * * * * /usr/bin/lynx  -source  http://localhost/index.php/home/SaveHashrate  > /dev/null 2>&2
+$  sudo /etc/init.d/cron restart
+
+````
+
+#### 添加PHP服务
+
+````
+$  sudo chmod 777 /home/pi/cgminer.conf 
+$  sudo chmod 777 /var/www/data
+$  sudo chmod 777 /etc/network/interfaces
+$  sudo chmod 777 /etc/resolv.conf 
+
+````
+安装cgminer
 
 ```
-# 动态IP
-iface eth0 inet dhcp
-
-# 静态IP
-iface eth0 inet static
-address 10.0.1.145
-netmask 255.255.255.0
-gateway 10.0.1.1
+$  sudo apt-get update
+$  sudo apt-get install libusb-1.0-0-dev libusb-1.0-0 libcurl4-openssl-dev libncurses5-dev libudev-dev
+$  wget http://ck.kolivas.org/apps/cgminer/
+$  tar xvf cgminer-4.3.2.tar.bz2
+$  cd cgminer
+$  ./configure --enable-icarus
+$  sudo  make
 ```
 
-设置DNS: `vi /etc/resolv.conf`
+制作一个服务 自启动。
+####在 /etc/init.d/目录下新建cgminer文件：
 
 ```
-nameserver 8.8.8.8
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          cgminer
+# Required-Start:    $remote_fs
+# Required-Stop:     $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start or stop the HTTP Proxy.
+### END INIT INFO
+case $1 in
+    start)
+          sudo nohup  /home/pi/cgminer/cgminer --config /home/pi/cgminer.conf > /home/pi/nohup2.out 2>&1 &
+        ;;
+    stop)
+        killall cgminer
+        ;;
+*)
+echo "Usage: $0 (start|stop)"
+;;
+esac
 ```
 
-设置后保存，重启：`sudo /etc/init.d/networking restart`
-
-### oh my zsh
+####修改cgminer文件权限，并执行命令
 
 ```
-git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
-cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
-chsh -s `which zsh`
+sudo update-rc.d cgminer defaults
 ```
 
-### 设置系统时区
+为了防止cgminer自己挂掉 增加监控脚本
+
+### 新建在pi用户下新建shell目录，然后新建monitor_cgminer.sh文件
 ````
-dpkg-reconfigure tzdata
-````
+pi@raspberrypi ~ $ mkdir shell 
+pi@raspberrypi ~/shell $ sudo nano monitor_cgminer.sh
 
-### 安装nginx, php，用于查看监控数据
-
-````
-apt-get install nginx php5 php5-common php5-cli php5-fpm php5-gd php5-mcrypt php5-mysql php5-gmp
-
-# 修改nginx配置，支持php-fpm
-/etc/init.d/nginx restart
-
-# 设置时区，修改php.ini
-# date.timezone = Asia/Shanghai
-
-/etc/init.d/php5-fpm restart
-````
-
-
-
-### Install cgminer
-
-````
-sudo apt-get install libusb-1.0-0-dev libusb-1.0-0 libcurl4-openssl-dev libncurses5-dev libudev-dev autoconf aptitude
-sudo aptitude install libtool
-
-mkdir -p ~/asic/cgminer
-cd ~/asic/cgminer
-git clone https://github.com/ckolivas/cgminer.git
-
-cd cgminer
-./autogen.sh
-./configure --enable-hashratio
-make
-sudo make install
 ````
 
-### Install cmd
+### 脚本文件如下：
 
-```
-# avalon
-cgminer -o stratum+tcp://stratum.mining.eligius.st:3334 -u 1PDqnS6aC4xzUa9wPeJukbRMaJtttdm4Aj -p xxxx --avalon-options 115200:24:10:45:300 --avalon-temp 60 --avalon-cutoff 70 --api-allow "W:0/0" --api-listen --debug --syslog
+````
+#!/bin/sh
+ps -fe|grep cgminer/cgminer |grep -v grep
+if [ $? -ne 0 ]
+then
+sudo reboot
+now=`date  +%Y-%m-%d[%H:%M:%S]` 
+echo "at $now reboot sys" >> /home/pi/shell/check_cgminer.log 
 
-# icarus
-# cgminer -o stratum+tcp://stratum.mining.eligius.st:3334 -u 1PDqnS6aC4xzUa9wPeJukbRMaJtttdm4Aj -p xxxx --icarus-options 115200:1:1 --icarus-timing 3.0=100
+fi
 
-```
+````
+*/1 * * * * /usr/bin/lynx  -source  http://localhost/index.php/home/SaveHashrate  > /dev/null 2>&2
+*/5 * * * * sudo bash /home/pi/shell/monitor_cgminer.sh
+0 */1  * * * sudo cp /dev/null /home/pi/nohup2.out
+
+
+````
 
 ## 备份树莓派镜像
-
-````
-sudo dd bs=4m if=/dev/rdisk1 of=rpi_hashratio_20140425.img
-tar zcvf rpi_hashratio_20140425.img.tar.gz ./rpi_hashratio_20140425.img
-
-# img文件与SD一样大小，这里是8G，压缩文件大约900MB
-````
