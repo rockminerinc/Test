@@ -20,7 +20,6 @@ $  sudo apt-get install php5
 $  sudo chmod -R 777 /var/www
 $  sudo chmod 777 /etc/network/interfaces
 $  sudo chmod 777 /etc/resolv.conf 
-
 ````
 下载最新webUI<所有文件\文档\树莓派\webui>,通过SSH上传webUI文件到树莓派，替换var目录下www文件夹
 
@@ -44,7 +43,6 @@ www-data ALL=(ALL) NOPASSWD: ALL
 
 ````
 $  sudo apt-get install lynx
-
 ````
 
 添加crontab，1分钟保存一次数据
@@ -53,7 +51,6 @@ $  sudo apt-get install lynx
 $  crontab -e
    */1 * * * * /usr/bin/lynx  -source  http://localhost/index.php/home/SaveHashrate  > /dev/null 2>&2
 $  sudo /etc/init.d/cron restart
-
 ````
 
 #### 添加PHP服务
@@ -63,15 +60,14 @@ $  sudo chmod 777 /home/pi/cgminer.conf
 $  sudo chmod 777 /var/www/data
 $  sudo chmod 777 /etc/network/interfaces
 $  sudo chmod 777 /etc/resolv.conf 
-
 ````
 #### 安装cgminer
 
 ```
 $  sudo apt-get update
 $  sudo apt-get install libusb-1.0-0-dev libusb-1.0-0 libcurl4-openssl-dev libncurses5-dev libudev-dev
-$  wget http://ck.kolivas.org/apps/cgminer/
-$  tar xvf cgminer-4.3.2.tar.bz2
+$  wget https://github.com/rockminerinc/Test/blob/master/cgminer_rockminer.tar.gz
+$  tar xvf cgminer_rockminer.tar.gz
 $  cd cgminer
 $  ./configure --enable-icarus
 $  sudo  make
@@ -115,7 +111,6 @@ sudo update-rc.d cgminer defaults
 ````
 pi@raspberrypi ~ $ mkdir shell 
 pi@raspberrypi ~/shell $ sudo nano monitor_cgminer.sh
-
 ````
 脚本文件如下：
 
@@ -129,7 +124,6 @@ now=`date  +%Y-%m-%d[%H:%M:%S]`
 echo "at $now reboot sys" >> /home/pi/shell/check_cgminer.log 
 
 fi
-
 ````
 增加crontab（定时检查执行）,执行 crontab -e  添加：
 
@@ -137,8 +131,6 @@ fi
 */1 * * * * /usr/bin/lynx  -source  http://localhost/index.php/home/SaveHashrate  > /dev/null 2>&2
 */5 * * * * sudo bash /home/pi/shell/monitor_cgminer.sh
 0 */1  * * * sudo cp /dev/null /home/pi/nohup2.out
-
-
 ````
 
 #### 备份树莓派镜像
