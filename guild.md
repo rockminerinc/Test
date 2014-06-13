@@ -9,8 +9,8 @@
     http://www.cnbeta.com/articles/204970.htm
 ````
 
-#### 2.首次修改IP地址
-插入SD卡开机,连接显示器，键盘。在开机信息最后显示当前IP地址,如下：
+#### 2.获取IP地址
+方法1.插入SD卡开机,连接显示器，键盘。在开机信息最后显示当前IP地址,如下：
 ````
 My IP Address is 192.168.1.128
 ````
@@ -26,7 +26,13 @@ $  sudo ifconfig
 $  sudo route add default gw 192.168.1.1
 ````
 
-获取树莓派的IP地址后，后续操作可通过远程登录修改。远程登录账户为pi，初始密码为raspberry。
+方法2.通过登录路由器WEB界面的客户端列表，找到Raspberry设备的IP地址。
+
+#### 3.修改为静态IP地址 
+
+获取树莓派的IP地址后，后续操作可通过远程登录修改。
+
+远程登录账户为pi，初始密码为raspberry。
 
 备份/etc/network/interfaces文件，并打开：
 ````
@@ -46,17 +52,6 @@ netmask 255.255.0.0
 network 192.168.1.0
 ````
 
-#### 3.树莓派中获得root权限
-
-重新开启root账号，可由pi用户登录后，在命令行下执行
-````
-sudo passwd root
-````
-执行此命令后系统会提示输入两遍的root密码，输入你想设的密码即可，然后在执行
-````
-sudo passwd --unlock root
-````
-
 #### 4.安装WEB服务
 
 ````
@@ -65,7 +60,7 @@ $  sudo apt-get install apache2
 $  sudo apt-get install php5
 $  sudo chmod -R 777 /var/www
 $  sudo chmod 777 /etc/network/interfaces
-$  sudo chmod 777 /etc/resolv.conf 
+$  sudo chmod 777 /etc/resols
 ````
 下载最新webUI<所有文件\文档\树莓派\webui>,通过SSH上传webUI文件到树莓派，替换var目录下www文件夹
 
@@ -75,7 +70,11 @@ $  sudo chmod 777 /etc/resolv.conf
 $  sudo nano /etc/sudoers
 ````
 
-添加一行 Defaults visiblepw
+在其中添加：
+````
+ Defaults visiblepw
+````
+再结尾添加：
 
 ````
 #includedir /etc/sudoers.d
@@ -110,10 +109,12 @@ $  sudo chmod 777 /etc/resolv.conf
 
 ```
 $  sudo apt-get install libusb-1.0-0-dev libusb-1.0-0 libcurl4-openssl-dev libncurses5-dev libudev-dev
-$  wget https://github.com/rockminerinc/Test/blob/master/cgminer_rockminer.tar.gz
-$  tar xvf cgminer_rockminer.tar.gz
+$  cd /home/pi
+$  sudo  wget https://github.com/rockminerinc/Test/blob/master/cgminer-4.3.3-rockminer.zip
+$  sudo  unzip cgminer-4.3.3-rockminer.zip
 $  cd cgminer
-$  ./configure --enable-icarus
+$  chmod u+x configure
+$  sudo ./configure --enable-icarus
 $  sudo  make
 ```
 新建cgminer.conf配置文件
@@ -123,7 +124,7 @@ $  sudo nano /home/pi/cgminer.conf
 
 修改如下
 ```
-{"pools":[{"url":"stratum.mining.eligius.st:3334","user":"1ttbittW23Ds4MhaxRYJFv8BP3K8gq7NE","pass":"Password"},{"url":"stratum.f2pool.com:3333","user":"rockxie.test","pass":"Password"}],"api-listen":true,"api-port":"4028","expiry":"120","failover-only":true,"log":"5","no-pool-disable":true,"queue":"2","scan-time":"60","worktime":true,"shares":"0","kernel-path":"/usr/local/bin","api-allow":"W:0/0","icarus-options":"115200:1:1"}
+{"pools":[{"url":"uk1.ghash.io:3333","user":"rockminer.1","pass":"Password"},{"url":"stratum.f2pool.com:3333","user":"rockxie.test","pass":"Password"}],"api-listen":true,"api-port":"4028","expiry":"120","failover-only":true,"log":"5","no-pool-disable":true,"queue":"2","scan-time":"60","worktime":true,"shares":"0","kernel-path":"/usr/local/bin","api-allow":"W:0/0","icarus-options":"115200:1:1","rmu-auto":"350"}
 ```
 修改权限
 ```
@@ -131,6 +132,10 @@ $  sudo chmod 777 /home/pi/cgminer.conf
 ```
 #### 8.制作一个服务自启动。
 在 /etc/init.d/目录下新建cgminer文件：
+```
+$  sudo nano /etc/init.d/cgminer
+```
+修改如下：
 
 ```
 #!/bin/sh
@@ -146,7 +151,7 @@ case $1 in
     start)
           sudo nohup  /home/pi/cgminer/cgminer --config /home/pi/cgminer.conf > /home/pi/nohup2.out 2>&1 &
         ;;
-    stop)
+    stop).
         killall cgminer
         ;;
 *)
@@ -158,15 +163,17 @@ esac
 修改cgminer文件权限，并执行命令
 
 ```
-sudo update-rc.d cgminer defaults
+$  sudo chmod 777 /home/pi/cgminer.conf
+$  sudo update-rc.d cgminer defaults
 ```
 
 ####  9.cgminer增加监控脚本
 
 新建在pi用户下新建shell目录，然后新建monitor_cgminer.sh文件
 ````
-pi@raspberrypi ~ $ mkdir shell 
-pi@raspberrypi ~/shell $ sudo nano monitor_cgminer.sh
+cd /home/pi
+$ mkdir shell 
+$ sudo nano monitor_cgminer.sh
 ````
 脚本文件如下：
 
