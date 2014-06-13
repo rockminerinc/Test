@@ -10,7 +10,7 @@
 ````
 
 #### 2.首次修改IP地址
-插入SD卡开机,连接显示器，键盘。在开机信息最后一行显示当前IP地址,如下：
+插入SD卡开机,连接显示器，键盘。在开机信息最后显示当前IP地址,如下：
 ````
 My IP Address is 192.168.1.128
 ````
@@ -31,7 +31,7 @@ $  sudo route add default gw 192.168.1.1
 备份/etc/network/interfaces文件，并打开：
 ````
 $  cd /etc/network
-$  cp interfaces interfaces1
+$  sudo cp interfaces interfaces1
 $  sudo nano interfaces
 ````
 修改如下：
@@ -60,6 +60,7 @@ sudo passwd --unlock root
 #### 4.安装WEB服务
 
 ````
+$  sudo apt-get update
 $  sudo apt-get install apache2
 $  sudo apt-get install php5
 $  sudo chmod -R 777 /var/www
@@ -101,7 +102,6 @@ $  sudo /etc/init.d/cron restart
 #### 6.添加PHP服务
 
 ````
-$  sudo chmod 777 /home/pi/cgminer.conf 
 $  sudo chmod 777 /var/www/data
 $  sudo chmod 777 /etc/network/interfaces
 $  sudo chmod 777 /etc/resolv.conf 
@@ -109,7 +109,6 @@ $  sudo chmod 777 /etc/resolv.conf
 #### 7.安装cgminer
 
 ```
-$  sudo apt-get update
 $  sudo apt-get install libusb-1.0-0-dev libusb-1.0-0 libcurl4-openssl-dev libncurses5-dev libudev-dev
 $  wget https://github.com/rockminerinc/Test/blob/master/cgminer_rockminer.tar.gz
 $  tar xvf cgminer_rockminer.tar.gz
@@ -117,7 +116,19 @@ $  cd cgminer
 $  ./configure --enable-icarus
 $  sudo  make
 ```
+新建cgminer.conf配置文件
+```
+$  sudo nano /home/pi/cgminer.conf 
+```
 
+修改如下
+```
+{"pools":[{"url":"stratum.mining.eligius.st:3334","user":"1ttbittW23Ds4MhaxRYJFv8BP3K8gq7NE","pass":"Password"},{"url":"stratum.f2pool.com:3333","user":"rockxie.test","pass":"Password"}],"api-listen":true,"api-port":"4028","expiry":"120","failover-only":true,"log":"5","no-pool-disable":true,"queue":"2","scan-time":"60","worktime":true,"shares":"0","kernel-path":"/usr/local/bin","api-allow":"W:0/0","icarus-options":"115200:1:1"}
+```
+修改权限
+```
+$  sudo chmod 777 /home/pi/cgminer.conf 
+```
 #### 8.制作一个服务自启动。
 在 /etc/init.d/目录下新建cgminer文件：
 
