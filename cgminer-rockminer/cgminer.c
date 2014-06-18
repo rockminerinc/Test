@@ -207,14 +207,10 @@ char *opt_icarus_timing = NULL;
 float opt_anu_freq = 270;
 float opt_rock_freq = 0;
 int opt_rock_speed = 0;
-int opt_rock_fan = 10;
+int opt_rock_fan = 100;
 bool opt_rock_log = 0;
 bool opt_rock_debug= 0;
-float opt_rock_chip_1 = 0;
-float opt_rock_chip_2 = 0;
-float opt_rock_chip_3 = 0;
-float opt_rock_chip_4 = 0;
-float opt_rock_auto_freq = 0;
+float opt_rock_auto_freq = 350;
 int opt_rock_hard =0;
 int opt_rock_workmode  = 0;
 
@@ -1074,7 +1070,7 @@ static struct opt_table opt_config_table[] = {
 			"Enable RockMiner debug mode, default: disabled"),
 	OPT_WITH_ARG("--rmu-fan",
 		     set_int_0_to_100, opt_show_intval, &opt_rock_fan,
-		     "Set RockMiner fan speed, range 0-10"),
+		     "Set RockMiner fan speed, range 0-100"),
 	OPT_WITH_ARG("--rmu-speed",
 		     set_int_0_to_9999, opt_show_intval, &opt_rock_speed,
 		     "MP MODE"),
@@ -2605,13 +2601,13 @@ static void curses_print_status(void)
 			{
 			opt_rock_auto_freq = 0;
 			opt_rock_freq =300;
-			opt_rock_fan = 7;
+			opt_rock_fan = 70;
 			}
 		else if(opt_rock_workmode == 3)  // max
 			{
 			opt_rock_auto_freq = 360;
 			opt_rock_freq =0;
-			opt_rock_fan = 10;
+			opt_rock_fan = 100;
 			}
 
 	#else
